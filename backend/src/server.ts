@@ -1,53 +1,57 @@
+import { Server } from "@overnightjs/core";
 import cors from "cors";
 import { config } from "dotenv";
 import express from "express";
-import fileRoutes from "./routes/fileRoutes";
-import searchRoutes from "./routes/searchRoutes";
+import { FileController } from "./controllers/fileController";
+import { HealthController } from "./controllers/healthController";
+import { SearchController } from "./controllers/searchController";
 
 // Load environment variables
 config();
 
-// Create Express application
-const app = express();
-const port = process.env.PORT || 3000;
+export class SetupServer extends Server {
+  constructor(private port = process.env.PORT || 3000) {
+    super();
+  }
 
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+  public setup() {
+    this.app.use(
+      cors({
+        origin: "*",
+        methods: ["GET", "POST"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      })
+    );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+  }
 
-// Routes
-app.use("/api/files", fileRoutes);
-app.use("/api/search", searchRoutes);
+  public setupControllers() {
+    const fileController = new FileController();
+    const searchController = new SearchController();
+    const healthCheckController = new HealthController();
 
-// Health check endpoint
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
-});
+    this.addControllers([
+      fileController,
+      searchController,
+      healthCheckController,
+    ]);
+  }
 
-// Basic root endpoint
-app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "PDF Search API is running",
-    endpoints: {
-      health: "/health",
-      uploadFile: "/api/files/upload",
-      getFile: "/api/files/:id",
-      search: "/api/search",
-    },
-  });
-});
+  public start() {
+    this.app.listen(this.port, () => {
+      console.log(`Server is running on http://localhost:${this.port}`);
+      console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    });
+  }
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-});
+  public init() {
+    this.setup();
+    this.setupControllers();
+  }
 
-export default app;
+  public getApp() {
+    return this.app;
+  }
+}

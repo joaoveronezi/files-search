@@ -6,7 +6,8 @@ export interface UploadResponse {
   pageCount?: number;
 }
 
-const API_PUBLIC_URL = import.meta.env.API_PUBLIC_URL;
+const API_PUBLIC_URL =
+  import.meta.env.API_PUBLIC_URL || "http://localhost:3000";
 
 /**
  * Uploads a PDF file to the backend for processing

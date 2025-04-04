@@ -1,4 +1,4 @@
-import Home from "./pages/home";
+import Home from "./pages/Home";
 
 // Setting only Home for now
 const App = () => {

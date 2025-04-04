@@ -14,7 +14,8 @@ export interface SearchResponse {
   fileName?: string;
 }
 
-const API_PUBLIC_URL = import.meta.env.API_PUBLIC_URL;
+const API_PUBLIC_URL =
+  import.meta.env.API_PUBLIC_URL || "http://localhost:3000";
 
 /**
  * Searches for content in the uploaded document
